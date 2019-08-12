@@ -18,8 +18,8 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:textColor="@color/black"
-        android:background="@color/white"
+        android:textColor="@color/white"
+        android:background="@color/black"
         android:text="VODPlayer"
         android:id="@+id/buttonVODPlayer"
         android:layout_width="match_parent"

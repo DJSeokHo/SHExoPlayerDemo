@@ -1,5 +1,6 @@
 package kr.co.dotv365.shexoplayerdemo.exoplayer;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -10,10 +11,12 @@ import android.widget.FrameLayout;
 
 import kr.co.dotv365.shexoplayerdemo.R;
 import kr.co.dotv365.shexoplayerdemo.constants.Constants;
-import kr.co.dotv365.shexoplayerdemo.exoplayer.vod.VODPlayerViewHolder;
+import kr.co.dotv365.shexoplayerdemo.exoplayer.constants.PlayerConstants;
+import kr.co.dotv365.shexoplayerdemo.exoplayer.player.PlayerViewHolder;
 import kr.co.dotv365.shexoplayerdemo.framework.util.debug.log.ILog;
 import kr.co.dotv365.shexoplayerdemo.framework.util.display.DisplayUtils;
 import kr.co.dotv365.shexoplayerdemo.framework.util.theme.ThemeUtil;
+import kr.co.dotv365.shexoplayerdemo.framework.util.thread.ThreadUtil;
 
 public class ExoPlayerActivity extends AppCompatActivity {
 
@@ -24,7 +27,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     private boolean isFullScreen = false;
 
-    private VODPlayerViewHolder vodPlayerViewHolder;
+    private PlayerViewHolder vodPlayerViewHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +47,41 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     private void initVODPlayer() {
 
-        vodPlayerViewHolder = new VODPlayerViewHolder(this);
+        vodPlayerViewHolder = new PlayerViewHolder(this);
+        vodPlayerViewHolder.setDelegate(new PlayerViewHolder.VODPlayerViewHolderDelegate() {
+            @Override
+            public void onCloseClicked() {
+                frameLayoutPlayerContainer.removeAllViews();
+                finish();
+            }
+
+            @Override
+            public void onFullScreenClicked() {
+                if(isFullScreen) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    ThreadUtil.startUIThread(3000, new Runnable() {
+                        @Override
+                        public void run() {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                        }
+                    });
+                }
+                else{
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+
+            }
+        });
 
         frameLayoutPlayerContainer.removeAllViews();
         frameLayoutPlayerContainer.addView(vodPlayerViewHolder.getView());
 
-        vodPlayerViewHolder.initPlayer(Constants.VOD_URL);
-        vodPlayerViewHolder.play();
+        vodPlayerViewHolder.setTitle("Title");
+        vodPlayerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
+//        vodPlayerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
+//        vodPlayerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
+
+        vodPlayerViewHolder.initPlayer();
     }
 
     /**
@@ -88,54 +119,70 @@ public class ExoPlayerActivity extends AppCompatActivity {
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             // set full
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
+
+            if(vodPlayerViewHolder != null) {
+                vodPlayerViewHolder.setFullScreen();
+            }
         }
         else {
 
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
-
             // set dp
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayUtils.dipToPx(this, 200));
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
+
+            if(vodPlayerViewHolder != null) {
+                vodPlayerViewHolder.setNormalScreen();
+            }
         }
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
         ILog.iLogDebug(TAG, "onResume");
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.play();
-        }
+        resumePlay();
     }
 
     @Override
     protected void onPause() {
         ILog.iLogDebug(TAG, "onPause");
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.pause();
-        }
+        pausePlay();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         ILog.iLogDebug(TAG, "onStop");
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.pause();
-        }
+        pausePlay();
         super.onStop();
     }
 
-    @Override
-    protected void onDestroy() {
+    private void resumePlay() {
+        if(vodPlayerViewHolder != null) {
+            vodPlayerViewHolder.resumePlay();
+        }
+    }
+
+    private void pausePlay() {
+        if(vodPlayerViewHolder != null) {
+            vodPlayerViewHolder.pause();
+        }
+    }
+
+    private void destroyPlayer() {
         if(vodPlayerViewHolder != null) {
             vodPlayerViewHolder.stopWithReset();
             vodPlayerViewHolder.destroy();
             vodPlayerViewHolder = null;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        destroyPlayer();
         super.onDestroy();
     }
 
