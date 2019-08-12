@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SHExoPlayerDemo</string>
+    <string name="local_touch_back_twice_to_exit">连按两次回退键以退出App</string>
+</resources>
