@@ -5,8 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,8 +20,6 @@ import kr.co.dotv365.shexoplayerdemo.exoplayer.constants.PlayerConstants;
 import kr.co.dotv365.shexoplayerdemo.exoplayer.player.PlayerViewHolder;
 import kr.co.dotv365.shexoplayerdemo.framework.util.debug.log.ILog;
 import kr.co.dotv365.shexoplayerdemo.framework.util.display.DisplayUtils;
-import kr.co.dotv365.shexoplayerdemo.framework.util.eventsplitshot.eventcenter.EventCenter;
-import kr.co.dotv365.shexoplayerdemo.framework.util.eventsplitshot.subject.ESSArrows;
 import kr.co.dotv365.shexoplayerdemo.framework.util.intent.IntentUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.size.DensityUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.theme.ThemeUtil;
@@ -71,18 +69,6 @@ public class ExoPlayerActivity extends AppCompatActivity {
             private float tranY;
 
             @Override
-            public void onCloseClicked() {
-                ILog.iLogDebug(TAG, "onCloseClicked");
-//                        removeFloatingViewHolderAndExit();
-            }
-
-            @Override
-            public void onBackClicked() {
-                ILog.iLogDebug(TAG, "onBackClicked");
-//                        openDetail();
-            }
-
-            @Override
             public void onActionDown(MotionEvent event) {
                 lastX = event.getRawX();
                 lastY = event.getRawY();
@@ -116,7 +102,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 }
                 else {
                     windowManager.removeView(playerViewHolder.getView());
-                    EventCenter.getInstance().sendEvent(ESSArrows.EXIT_APP, this, null);
+                    finish();
                 }
             }
 

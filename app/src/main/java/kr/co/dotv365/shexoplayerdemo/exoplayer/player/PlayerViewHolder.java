@@ -56,17 +56,15 @@ public class PlayerViewHolder {
     }
 
     public interface FloatingPlayerViewHolderDelegate {
-        void onCloseClicked();
-        void onBackClicked();
         void onActionDown(MotionEvent event);
         void onActionMove(MotionEvent event);
     }
 
     private final static String TAG = "PlayerViewHolder";
 
-    private final static int STOP = 1;
-    private final static int PLAYING = 3;
-    private final static int PLAY_FINISHED = 4;
+    private final static int PLAYER_STATE_STOP = 1;
+    private final static int PLAYER_STATE_PLAYING = 3;
+    private final static int PLAYER_STATE_FINISHED = 4;
 
     private View view;
 
@@ -98,8 +96,6 @@ public class PlayerViewHolder {
 
     private FrameLayout frameLayoutProgress;
 
-    private boolean isSeeking = false;
-
     private Player.EventListener eventListener = new Player.EventListener() {
 
         @Override
@@ -127,17 +123,17 @@ public class PlayerViewHolder {
                 return;
             }
 
-            if(playWhenReady && PLAYING == playbackState) {
+            if(playWhenReady && PLAYER_STATE_PLAYING == playbackState) {
                 startSync();
                 return;
             }
 
-            if(playWhenReady && STOP == playbackState) {
+            if(playWhenReady && PLAYER_STATE_STOP == playbackState) {
                 stopSync();
                 return;
             }
 
-            if(playWhenReady && PLAY_FINISHED == playbackState) {
+            if(playWhenReady && PLAYER_STATE_FINISHED == playbackState) {
                 // play finished
                 playerState = PlayerConstants.PlayerState.STOP;
                 updateControllerUI();
@@ -460,7 +456,6 @@ public class PlayerViewHolder {
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
                     stopSync();
-                    isSeeking = true;
                 }
 
                 @Override
@@ -468,7 +463,6 @@ public class PlayerViewHolder {
                     ILog.iLogDebug(TAG, seekBar.getProgress());
                     seekTo(seekBar.getProgress());
                     showProgress();
-                    isSeeking = false;
                     toggleController();
                 }
             });
@@ -484,7 +478,6 @@ public class PlayerViewHolder {
             textViewTime.setVisibility(View.VISIBLE);
         }
 
-        ILog.iLogDebug(TAG, "max is " + max + " current is " + progress);
         seekBar.setMax(max);
         seekBar.setProgress(progress);
     }
@@ -494,19 +487,24 @@ public class PlayerViewHolder {
     }
 
     private void createMediaSource() {
-        if(urlType == PlayerConstants.URLType.MP4) {
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(view.getContext(), Util.getUserAgent(view.getContext(), view.getContext().getString(R.string.app_name)));
 
-            videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(url));
-        }
-        else if(urlType == PlayerConstants.URLType.HLS) {
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(view.getContext(), Util.getUserAgent(view.getContext(), view.getContext().getString(R.string.app_name)));
-            videoSource = new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(url));
-        }
-        else if(urlType == PlayerConstants.URLType.RTMP) {
-            RtmpDataSourceFactory rtmpDataSourceFactory = new RtmpDataSourceFactory();
-            // This is the MediaSource representing the media to be played.
-            videoSource = new ExtractorMediaSource.Factory(rtmpDataSourceFactory).createMediaSource(Uri.parse(url));
+        switch (urlType) {
+            case MP4: {
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(view.getContext(), Util.getUserAgent(view.getContext(), view.getContext().getString(R.string.app_name)));
+                videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(url));
+                break;
+            }
+            case HLS: {
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(view.getContext(), Util.getUserAgent(view.getContext(), view.getContext().getString(R.string.app_name)));
+                videoSource = new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(url));
+                break;
+            }
+            case RTMP: {
+                RtmpDataSourceFactory rtmpDataSourceFactory = new RtmpDataSourceFactory();
+                // This is the MediaSource representing the media to be played.
+                videoSource = new ExtractorMediaSource.Factory(rtmpDataSourceFactory).createMediaSource(Uri.parse(url));
+                break;
+            }
         }
 
         // Prepare the player with the source.
