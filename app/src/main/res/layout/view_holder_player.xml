@@ -9,7 +9,8 @@
     <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/exoPlayerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@color/black"/>
 
     <View
         android:id="@+id/viewCover"
@@ -134,8 +135,8 @@
             android:clickable="true"
             android:background="@color/half_transparent"
             android:layout_gravity="center"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:focusable="true">
 
             <ImageButton
@@ -144,8 +145,8 @@
                 android:scaleType="centerInside"
                 android:background="@color/transparent"
                 android:id="@+id/imageButtonPlayBig"
-                android:layout_width="40dp"
-                android:layout_height="40dp" />
+                android:layout_width="26dp"
+                android:layout_height="26dp" />
         </FrameLayout>
 
     </FrameLayout>

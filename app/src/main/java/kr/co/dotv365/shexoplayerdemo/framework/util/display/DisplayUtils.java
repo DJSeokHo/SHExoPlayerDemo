@@ -2,6 +2,8 @@ package kr.co.dotv365.shexoplayerdemo.framework.util.display;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 /**
  * Created by seokho on 21/06/2017.
@@ -65,6 +67,10 @@ public class DisplayUtils {
         return (int)(spValue * fontScale + 0.5f);
     }
 
-
-
+    public static int getScreenWidthPx(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(dm);
+        return dm.widthPixels;
+    }
 }

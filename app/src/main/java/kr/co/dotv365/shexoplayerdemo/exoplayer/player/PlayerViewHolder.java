@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -290,6 +291,7 @@ public class PlayerViewHolder {
                        break;
 
                     case MotionEvent.ACTION_UP:
+                        ILog.iLogDebug(TAG, "touch view cover");
                         toggleController();
                         return true;
                 }
@@ -385,6 +387,8 @@ public class PlayerViewHolder {
 
         exoPlayerView = view.findViewById(R.id.exoPlayerView);
 
+        exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+
         //initiate Player
         //Create a default TrackSelector
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -405,6 +409,7 @@ public class PlayerViewHolder {
 
         updateControllerUI();
         toggleController();
+
     }
 
     private void startSync() {

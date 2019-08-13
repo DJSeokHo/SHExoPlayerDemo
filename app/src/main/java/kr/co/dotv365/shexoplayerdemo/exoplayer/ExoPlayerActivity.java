@@ -53,6 +53,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     private void findView() {
         frameLayoutPlayerContainer = findViewById(R.id.frameLayoutPlayerContainer);
+
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
+        frameLayoutPlayerContainer.setLayoutParams(layoutParams);
     }
 
     private void initPlayer() {
@@ -205,7 +208,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
             // set dp
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayUtils.dipToPx(this, 200));
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
 
             if(playerViewHolder != null) {
@@ -218,7 +221,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         windowManager.removeViewImmediate(playerViewHolder.getView());
 
-        // reset size
+        // reset player size
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         playerViewHolder.getView().setLayoutParams(layoutParams);
 
@@ -259,7 +262,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
                 // floating window size
                 layoutParams.width = DensityUtil.dip2px(ExoPlayerActivity.this, 250);
-                layoutParams.height = DensityUtil.dip2px(ExoPlayerActivity.this, 180);
+                layoutParams.height = DensityUtil.dip2px(ExoPlayerActivity.this, (int)(250 * Constants.RATE));
 
                 // floating window background
                 layoutParams.format = PixelFormat.TRANSPARENT;

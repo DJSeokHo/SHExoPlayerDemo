@@ -17,4 +17,6 @@ public class Constants {
 
     public static long current = 0;
 
+    public static float RATE = 0.5625f;
+
 }
