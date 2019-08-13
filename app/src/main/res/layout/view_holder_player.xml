@@ -47,6 +47,7 @@
 
         <!-- time -->
         <TextView
+            android:paddingTop="5dp"
             android:gravity="center"
             android:id="@+id/textViewTime"
             android:textColor="@color/white"

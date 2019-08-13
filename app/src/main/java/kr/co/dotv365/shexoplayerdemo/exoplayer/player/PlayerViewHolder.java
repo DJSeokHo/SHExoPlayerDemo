@@ -35,11 +35,15 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
+import java.util.Timer;
+
 import kr.co.dotv365.shexoplayerdemo.R;
 import kr.co.dotv365.shexoplayerdemo.exoplayer.constants.PlayerConstants;
 import kr.co.dotv365.shexoplayerdemo.framework.util.animation.AnimationUtil;
+import kr.co.dotv365.shexoplayerdemo.framework.util.date.DateUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.debug.log.ILog;
 import kr.co.dotv365.shexoplayerdemo.framework.util.thread.ThreadUtil;
+import kr.co.dotv365.shexoplayerdemo.framework.util.timer.TimerUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.view.ViewUtil;
 
 public class PlayerViewHolder {
@@ -51,6 +55,8 @@ public class PlayerViewHolder {
 
     private final static String TAG = "PlayerViewHolder";
 
+    private final static int STOP = 1;
+    private final static int PLAYING = 3;
     private final static int PLAY_FINISHED = 4;
 
     private View view;
@@ -78,6 +84,8 @@ public class PlayerViewHolder {
 
     private FrameLayout frameLayoutProgress;
 
+    private boolean isSeeking = false;
+
     private Player.EventListener eventListener = new Player.EventListener() {
 
         @Override
@@ -100,6 +108,21 @@ public class PlayerViewHolder {
 
             ILog.iLogDebug(TAG, "onPlayerStateChanged " + playWhenReady + " " + playbackState);
 
+            if(!playWhenReady) {
+                stopSync();
+                return;
+            }
+
+            if(playWhenReady && PLAYING == playbackState) {
+                startSync();
+                return;
+            }
+
+            if(playWhenReady && STOP == playbackState) {
+                stopSync();
+                return;
+            }
+
             if(playWhenReady && PLAY_FINISHED == playbackState) {
                 // play finished
                 playerState = PlayerConstants.PlayerState.STOP;
@@ -107,6 +130,8 @@ public class PlayerViewHolder {
                 frameLayoutController.startAnimation(AnimationUtil.show(view.getContext()));
                 frameLayoutController.setVisibility(View.VISIBLE);
                 setSeekBar(0, 0);
+                stopSync();
+                setTimeText(0, 0);
             }
         }
 
@@ -170,6 +195,7 @@ public class PlayerViewHolder {
             }
 
             setSeekBar((int)simpleExoPlayer.getDuration(), (int)getCurrentPosition());
+
         }
     };
 
@@ -190,6 +216,8 @@ public class PlayerViewHolder {
             ILog.iLogDebug(TAG, "onVolumeChanged " + volume);
         }
     };
+
+    private Timer timer;
 
     public PlayerViewHolder(Context context) {
         view = ViewUtil.inflateView(context, R.layout.view_holder_player, null);
@@ -314,6 +342,29 @@ public class PlayerViewHolder {
         toggleController();
     }
 
+    private void startSync() {
+        timer = TimerUtil.createTimerTask(0, 1000, new Runnable() {
+            @Override
+            public void run() {
+                ILog.iLogDebug(TAG, getCurrentPosition());
+                if(seekBar != null) {
+                    seekBar.setProgress((int)getCurrentPosition());
+                    setTimeText(getCurrentPosition(), getDuration());
+                }
+            }
+        });
+    }
+
+    private void setTimeText(long currentMS, long totalMS) {
+        String current = DateUtil.getDateFromMilliSeconds(currentMS);
+        String total = DateUtil.getDateFromMilliSeconds(totalMS);
+        textViewTime.setText(String.format(view.getContext().getString(R.string.player_time), current, total));
+    }
+
+    private void stopSync() {
+        TimerUtil.cancelTimerTask(timer);
+    }
+
     private void setSeekBar(int max, int progress) {
 
         if(seekBar == null) {
@@ -322,12 +373,13 @@ public class PlayerViewHolder {
 
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                    setTimeText(seekBar.getProgress(), getDuration());
                 }
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-
+                    stopSync();
+                    isSeeking = true;
                 }
 
                 @Override
@@ -335,6 +387,8 @@ public class PlayerViewHolder {
                     ILog.iLogDebug(TAG, seekBar.getProgress());
                     seekTo(seekBar.getProgress());
                     showProgress();
+                    isSeeking = false;
+                    toggleController();
                 }
             });
         }
@@ -399,11 +453,13 @@ public class PlayerViewHolder {
     public void resumePlay() {
         simpleExoPlayer.setPlayWhenReady(true);
         playerState = PlayerConstants.PlayerState.PLAY;
+
     }
 
     public void pause() {
         simpleExoPlayer.setPlayWhenReady(false);
         playerState = PlayerConstants.PlayerState.PAUSE;
+
     }
 
     public void stopWithReset() {
@@ -460,7 +516,7 @@ public class PlayerViewHolder {
             ThreadUtil.startUIThread(2000, new Runnable() {
                 @Override
                 public void run() {
-                    if(playerState == PlayerConstants.PlayerState.PLAY && frameLayoutController.getVisibility() == View.VISIBLE) {
+                    if(playerState == PlayerConstants.PlayerState.PLAY && frameLayoutController.getVisibility() == View.VISIBLE && !isSeeking) {
                         // auto close when playing
                         frameLayoutController.startAnimation(AnimationUtil.hide(view.getContext()));
                         frameLayoutController.setVisibility(View.GONE);
@@ -514,6 +570,8 @@ public class PlayerViewHolder {
                 simpleExoPlayer.removeAudioListener(audioListener);
                 audioListener = null;
             }
+
+            TimerUtil.cancelTimerTask(timer);
 
             simpleExoPlayer.release();
             simpleExoPlayer = null;
