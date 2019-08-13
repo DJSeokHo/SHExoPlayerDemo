@@ -1,12 +1,17 @@
 package kr.co.dotv365.shexoplayerdemo.exoplayer;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import kr.co.dotv365.shexoplayerdemo.R;
@@ -15,6 +20,10 @@ import kr.co.dotv365.shexoplayerdemo.exoplayer.constants.PlayerConstants;
 import kr.co.dotv365.shexoplayerdemo.exoplayer.player.PlayerViewHolder;
 import kr.co.dotv365.shexoplayerdemo.framework.util.debug.log.ILog;
 import kr.co.dotv365.shexoplayerdemo.framework.util.display.DisplayUtils;
+import kr.co.dotv365.shexoplayerdemo.framework.util.eventsplitshot.eventcenter.EventCenter;
+import kr.co.dotv365.shexoplayerdemo.framework.util.eventsplitshot.subject.ESSArrows;
+import kr.co.dotv365.shexoplayerdemo.framework.util.intent.IntentUtil;
+import kr.co.dotv365.shexoplayerdemo.framework.util.size.DensityUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.theme.ThemeUtil;
 import kr.co.dotv365.shexoplayerdemo.framework.util.thread.ThreadUtil;
 
@@ -27,7 +36,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     private boolean isFullScreen = false;
 
-    private PlayerViewHolder vodPlayerViewHolder;
+    private PlayerViewHolder playerViewHolder;
+
+    private WindowManager.LayoutParams layoutParams;
+    private WindowManager windowManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +50,74 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         findView();
 
-        initVODPlayer();
+        initPlayer();
     }
 
     private void findView() {
         frameLayoutPlayerContainer = findViewById(R.id.frameLayoutPlayerContainer);
     }
 
-    private void initVODPlayer() {
+    private void initPlayer() {
 
-        vodPlayerViewHolder = new PlayerViewHolder(this);
-        vodPlayerViewHolder.setDelegate(new PlayerViewHolder.VODPlayerViewHolderDelegate() {
+        playerViewHolder = new PlayerViewHolder(this);
+
+        playerViewHolder.setFloatingDelegate(new PlayerViewHolder.FloatingPlayerViewHolderDelegate() {
+
+            private float lastX;
+            private float lastY;
+            private float nowX;
+            private float nowY;
+            private float tranX;
+            private float tranY;
+
             @Override
             public void onCloseClicked() {
-                frameLayoutPlayerContainer.removeAllViews();
-                finish();
+                ILog.iLogDebug(TAG, "onCloseClicked");
+//                        removeFloatingViewHolderAndExit();
+            }
+
+            @Override
+            public void onBackClicked() {
+                ILog.iLogDebug(TAG, "onBackClicked");
+//                        openDetail();
+            }
+
+            @Override
+            public void onActionDown(MotionEvent event) {
+                lastX = event.getRawX();
+                lastY = event.getRawY();
+            }
+
+            @Override
+            public void onActionMove(MotionEvent event) {
+                nowX = event.getRawX();
+                nowY = event.getRawY();
+
+                tranX = nowX - lastX;
+                tranY = nowY - lastY;
+
+                layoutParams.x += tranX;
+                layoutParams.y += tranY;
+
+                // update floating  window position
+                windowManager.updateViewLayout(playerViewHolder.getView(), layoutParams);
+
+                lastX = nowX;
+                lastY = nowY;
+            }
+        });
+
+        playerViewHolder.setDelegate(new PlayerViewHolder.PlayerViewHolderDelegate() {
+            @Override
+            public void onCloseClicked() {
+                if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
+                    frameLayoutPlayerContainer.removeAllViews();
+                    finish();
+                }
+                else {
+                    windowManager.removeView(playerViewHolder.getView());
+                    EventCenter.getInstance().sendEvent(ESSArrows.EXIT_APP, this, null);
+                }
             }
 
             @Override
@@ -71,17 +136,32 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 }
 
             }
+
+            @Override
+            public void onPIPClicked() {
+                if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
+                    playerViewHolder.setMode(PlayerConstants.Mode.FLOATTING);
+                    createFloatingWindow();
+                }
+                else {
+                    playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
+                    openDetail();
+                }
+            }
         });
 
-        frameLayoutPlayerContainer.removeAllViews();
-        frameLayoutPlayerContainer.addView(vodPlayerViewHolder.getView());
+        playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
 
-        vodPlayerViewHolder.setTitle("Title");
-        vodPlayerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
+        frameLayoutPlayerContainer.removeAllViews();
+        frameLayoutPlayerContainer.addView(playerViewHolder.getView());
+
+        playerViewHolder.setTitle("Title");
+
+        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
 //        vodPlayerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
 //        vodPlayerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
 
-        vodPlayerViewHolder.initPlayer();
+        playerViewHolder.initPlayer();
     }
 
     /**
@@ -120,8 +200,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
             // set full
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
 
-            if(vodPlayerViewHolder != null) {
-                vodPlayerViewHolder.setFullScreen();
+            if(playerViewHolder != null) {
+                playerViewHolder.setFullScreen();
             }
         }
         else {
@@ -133,10 +213,72 @@ public class ExoPlayerActivity extends AppCompatActivity {
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayUtils.dipToPx(this, 200));
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
 
-            if(vodPlayerViewHolder != null) {
-                vodPlayerViewHolder.setNormalScreen();
+            if(playerViewHolder != null) {
+                playerViewHolder.setNormalScreen();
             }
         }
+    }
+
+    private void openDetail() {
+
+        windowManager.removeViewImmediate(playerViewHolder.getView());
+
+        // reset size
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        playerViewHolder.getView().setLayoutParams(layoutParams);
+
+        frameLayoutPlayerContainer.removeAllViews();
+        frameLayoutPlayerContainer.addView(playerViewHolder.getView());
+
+        Intent intent = new Intent(getApplicationContext(), ExoPlayerActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    private void createFloatingWindow() {
+
+        ILog.iLogDebug(TAG, "createFloatingWindow");
+
+        IntentUtil.intentStartActionBackToHome(ExoPlayerActivity.this);
+
+        ThreadUtil.startThread(new Runnable() {
+            @Override
+            public void run() {
+
+                windowManager = (WindowManager) getApplication().getSystemService(WINDOW_SERVICE);
+
+                // TYPE_SYSTEM_ALERT allow receive event
+                // TYPE_SYSTEM_OVERLAY over system
+                layoutParams = new WindowManager.LayoutParams();
+                layoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT | WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+
+                // FLAG_NOT_TOUCH_MODAL not block event pass to behind
+                // FLAG_NOT_FOCUSABLE
+                layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
+                // floating window position
+                layoutParams.gravity = Gravity.CENTER;
+
+                layoutParams.x = 0;
+                layoutParams.y = 0;
+
+                // floating window size
+                layoutParams.width = DensityUtil.dip2px(ExoPlayerActivity.this, 250);
+                layoutParams.height = DensityUtil.dip2px(ExoPlayerActivity.this, 180);
+
+                // floating window background
+                layoutParams.format = PixelFormat.TRANSPARENT;
+
+                ThreadUtil.startUIThread(1000, new Runnable() {
+                    @Override
+                    public void run() {
+                        frameLayoutPlayerContainer.removeAllViews();
+                        windowManager.addView(playerViewHolder.getView(), layoutParams);
+                        playerViewHolder.resumePlay();
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -161,22 +303,22 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     private void resumePlay() {
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.resumePlay();
+        if(playerViewHolder != null) {
+            playerViewHolder.resumePlay();
         }
     }
 
     private void pausePlay() {
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.pause();
+        if(playerViewHolder != null) {
+            playerViewHolder.pause();
         }
     }
 
     private void destroyPlayer() {
-        if(vodPlayerViewHolder != null) {
-            vodPlayerViewHolder.stopWithReset();
-            vodPlayerViewHolder.destroy();
-            vodPlayerViewHolder = null;
+        if(playerViewHolder != null) {
+            playerViewHolder.stopWithReset();
+            playerViewHolder.destroy();
+            playerViewHolder = null;
         }
     }
 

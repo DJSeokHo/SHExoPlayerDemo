@@ -9,4 +9,8 @@ public class PlayerConstants {
     public enum URLType {
         MP4, HLS, RTMP
     }
+
+    public enum Mode {
+        NORMAL, FLOATTING
+    }
 }
