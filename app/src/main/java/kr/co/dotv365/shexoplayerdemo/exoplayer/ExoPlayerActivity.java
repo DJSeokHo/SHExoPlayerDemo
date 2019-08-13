@@ -120,16 +120,25 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 else{
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 }
-
             }
 
             @Override
             public void onPIPClicked() {
                 if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
+                    PlayerViewHolder.enterFloatingWindow = true;
                     playerViewHolder.setMode(PlayerConstants.Mode.FLOATTING);
                     createFloatingWindow();
                 }
                 else {
+                    PlayerViewHolder.enterFloatingWindow = false;
+                    playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
+                    openDetail();
+                }
+            }
+
+            @Override
+            public void onPlayerFinishPlay() {
+                if(playerViewHolder.getMode() == PlayerConstants.Mode.FLOATTING) {
                     playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
                     openDetail();
                 }
@@ -255,12 +264,11 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 // floating window background
                 layoutParams.format = PixelFormat.TRANSPARENT;
 
-                ThreadUtil.startUIThread(1000, new Runnable() {
+                ThreadUtil.startUIThread(0, new Runnable() {
                     @Override
                     public void run() {
                         frameLayoutPlayerContainer.removeAllViews();
                         windowManager.addView(playerViewHolder.getView(), layoutParams);
-                        playerViewHolder.resumePlay();
                     }
                 });
             }
@@ -289,13 +297,13 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     private void resumePlay() {
-        if(playerViewHolder != null) {
+        if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
             playerViewHolder.resumePlay();
         }
     }
 
     private void pausePlay() {
-        if(playerViewHolder != null) {
+        if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
             playerViewHolder.pause();
         }
     }

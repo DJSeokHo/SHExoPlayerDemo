@@ -53,6 +53,7 @@ public class PlayerViewHolder {
         void onCloseClicked();
         void onFullScreenClicked();
         void onPIPClicked();
+        void onPlayerFinishPlay();
     }
 
     public interface FloatingPlayerViewHolderDelegate {
@@ -88,6 +89,8 @@ public class PlayerViewHolder {
     private View viewCover;
 
     private PlayerConstants.PlayerState playerState = PlayerConstants.PlayerState.STOP;
+
+    public static boolean enterFloatingWindow = false;
 
     private String url;
     private PlayerConstants.URLType urlType = PlayerConstants.URLType.HLS;
@@ -142,6 +145,7 @@ public class PlayerViewHolder {
                 setSeekBar(0, 0);
                 stopSync();
                 updateTime(0, 0);
+                playerViewHolderDelegate.onPlayerFinishPlay();
             }
         }
 
@@ -297,8 +301,9 @@ public class PlayerViewHolder {
         imageButtonPIP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playerViewHolderDelegate.onPIPClicked();
+
                 toggleController();
+                playerViewHolderDelegate.onPIPClicked();
             }
         });
 
@@ -533,7 +538,6 @@ public class PlayerViewHolder {
     public void pause() {
         simpleExoPlayer.setPlayWhenReady(false);
         playerState = PlayerConstants.PlayerState.PAUSE;
-
     }
 
     public void stopWithReset() {
@@ -574,6 +578,10 @@ public class PlayerViewHolder {
 
     private long getCurrentPosition() {
         return simpleExoPlayer.getCurrentPosition();
+    }
+
+    public PlayerConstants.PlayerState getPlayerState() {
+        return playerState;
     }
 
     private void toggleController() {
