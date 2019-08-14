@@ -143,7 +143,10 @@ public class PlayerViewHolder {
                 updateControllerUI();
                 frameLayoutController.startAnimation(AnimationUtil.show(view.getContext()));
                 frameLayoutController.setVisibility(View.VISIBLE);
-                setSeekBar(0, 0);
+                if(urlType != PlayerConstants.URLType.RTMP) {
+                    setSeekBar(0, 0);
+                }
+
                 stopSync();
                 updateTime(0, 0);
                 playerViewHolderDelegate.onPlayerFinishPlay();
@@ -252,6 +255,8 @@ public class PlayerViewHolder {
         textViewTime = view.findViewById(R.id.textViewTime);
 
         viewCover = view.findViewById(R.id.viewCover);
+        seekBar = view.findViewById(R.id.seekBar);
+
     }
 
     public void setMode(PlayerConstants.Mode mode) {
@@ -410,6 +415,15 @@ public class PlayerViewHolder {
         updateControllerUI();
         toggleController();
 
+        if(urlType == PlayerConstants.URLType.RTMP) {
+            seekBar.setEnabled(false);
+            textViewTime.setVisibility(View.GONE);
+        }
+        else {
+            seekBar.setEnabled(true);
+            textViewTime.setVisibility(View.VISIBLE);
+        }
+
     }
 
     private void startSync() {
@@ -454,39 +468,26 @@ public class PlayerViewHolder {
 
     private void setSeekBar(int max, int progress) {
 
-        if(seekBar == null) {
-            seekBar = view.findViewById(R.id.seekBar);
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    updateTime(seekBar.getProgress(), getDuration());
-                }
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateTime(seekBar.getProgress(), getDuration());
+            }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    stopSync();
-                }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                stopSync();
+            }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    ILog.iLogDebug(TAG, seekBar.getProgress());
-                    seekTo(seekBar.getProgress());
-                    showProgress();
-                    toggleController();
-                }
-            });
-        }
-
-        if(urlType == PlayerConstants.URLType.RTMP) {
-            seekBar.setEnabled(false);
-            textViewTime.setVisibility(View.GONE);
-            return;
-        }
-        else {
-            seekBar.setEnabled(true);
-            textViewTime.setVisibility(View.VISIBLE);
-        }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ILog.iLogDebug(TAG, seekBar.getProgress());
+                seekTo(seekBar.getProgress());
+                showProgress();
+                toggleController();
+            }
+        });
 
         seekBar.setMax(max);
         seekBar.setProgress(progress);
