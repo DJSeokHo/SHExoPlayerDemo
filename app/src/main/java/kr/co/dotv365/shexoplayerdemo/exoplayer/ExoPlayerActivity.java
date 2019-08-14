@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import kr.co.dotv365.shexoplayerdemo.R;
 import kr.co.dotv365.shexoplayerdemo.constants.Constants;
@@ -31,6 +32,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
 
     private FrameLayout frameLayoutPlayerContainer;
+    private FrameLayout frameLayoutOtherContainer;
 
     private boolean isFullScreen = false;
 
@@ -53,8 +55,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     private void findView() {
         frameLayoutPlayerContainer = findViewById(R.id.frameLayoutPlayerContainer);
+        frameLayoutOtherContainer = findViewById(R.id.frameLayoutOtherContainer);
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
         frameLayoutPlayerContainer.setLayoutParams(layoutParams);
     }
 
@@ -184,6 +187,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         if(isFullScreen) {
 
+            frameLayoutOtherContainer.setVisibility(View.GONE);
+
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -194,7 +199,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
 
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), DisplayUtils.getScreenHeightPx(this));
             // set full
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
 
@@ -204,11 +209,13 @@ public class ExoPlayerActivity extends AppCompatActivity {
         }
         else {
 
+            frameLayoutOtherContainer.setVisibility(View.VISIBLE);
+
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
             // set dp
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
             frameLayoutPlayerContainer.setLayoutParams(layoutParams);
 
             if(playerViewHolder != null) {
@@ -222,7 +229,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         windowManager.removeViewImmediate(playerViewHolder.getView());
 
         // reset player size
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         playerViewHolder.getView().setLayoutParams(layoutParams);
 
         frameLayoutPlayerContainer.removeAllViews();

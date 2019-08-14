@@ -73,4 +73,11 @@ public class DisplayUtils {
         wm.getDefaultDisplay().getMetrics(dm);
         return dm.widthPixels;
     }
+
+    public static int getScreenHeightPx(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(dm);
+        return dm.heightPixels;
+    }
 }
