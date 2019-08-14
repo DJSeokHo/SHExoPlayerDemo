@@ -15,8 +15,6 @@ public class Constants {
     public final static String MP4_VOD_URL = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4";
     public final static String HLS_VOD_URL = "http://onnoffcompanyvod.xst.kinxcdn.com/onnoffcompanyvod/_definst_/2019/08/07/cicY82-20190807190819399.mp4/playlist.m3u8";
 
-    public static long current = 0;
-
     public static float RATE = 0.5625f;
 
 }
