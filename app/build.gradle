@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "kr.co.dotv365.shexoplayerdemo"
+        applicationId "com.swein.shexoplayerdemo"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
