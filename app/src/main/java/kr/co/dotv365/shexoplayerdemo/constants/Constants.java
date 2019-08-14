@@ -3,7 +3,8 @@ package kr.co.dotv365.shexoplayerdemo.constants;
 public class Constants {
 
 //    public final static String RTMP_URL = "rtmp://izecstm.xst.kinxcdn.com/dotv/d8m9i2";
-    public final static String RTMP_URL = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
+    public final static String RTMP_URL = "rtmp://fms.105.net/live/rmc1";
+//    public final static String RTMP_URL = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
 //    public final static String RTMP_URL = "rtmp://ns8.indexforce.com/home/mystream";
 //    public final static String RTMP_URL = "rtmp://media3.sinovision.net:1935/live/livestream";
 
