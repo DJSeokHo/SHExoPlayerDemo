@@ -276,12 +276,16 @@ public class PlayerViewHolder {
     private void setListener() {
 
         viewCover.setOnTouchListener(new View.OnTouchListener() {
+
+            long currentTime;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 switch (event.getAction()){
                     case MotionEvent.ACTION_DOWN:
                         if(mode == PlayerConstants.Mode.FLOATTING) {
+                            currentTime = System.currentTimeMillis();
                             floatingPlayerViewHolderDelegate.onActionDown(event);
                             return true;
                         }
@@ -296,6 +300,14 @@ public class PlayerViewHolder {
 
                     case MotionEvent.ACTION_UP:
                         ILog.iLogDebug(TAG, "touch view cover");
+
+                        if(mode == PlayerConstants.Mode.FLOATTING) {
+                            if(System.currentTimeMillis() - currentTime > 500) {
+                                currentTime = 0;
+                                return true;
+                            }
+                        }
+
                         toggleController();
                         return true;
                 }
