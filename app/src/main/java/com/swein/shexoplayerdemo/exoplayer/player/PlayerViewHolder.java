@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.Format;
 import com.swein.shexoplayerdemo.R;
 import com.swein.shexoplayerdemo.framework.util.date.DateUtil;
 import com.swein.shexoplayerdemo.framework.util.debug.log.ILog;
@@ -204,6 +205,10 @@ public class PlayerViewHolder {
             ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
             ILog.iLogDebug(TAG, simpleExoPlayer.getContentDuration());
             ILog.iLogDebug(TAG, simpleExoPlayer.getTotalBufferedDuration());
+
+            ILog.iLogDebug(TAG, "getVideoFormat " + (simpleExoPlayer.getVideoFormat() == null));
+            ILog.iLogDebug(TAG, "width " + simpleExoPlayer.getVideoFormat().width);
+            ILog.iLogDebug(TAG, "height " + simpleExoPlayer.getVideoFormat().height);
 
             hideProgress();
 
@@ -453,6 +458,27 @@ public class PlayerViewHolder {
                 }
             }
         });
+    }
+
+    public int getVideoWidth() {
+
+        Format format = simpleExoPlayer.getVideoFormat();
+        if(format != null) {
+            return format.width;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public int getVideoHeight() {
+        Format format = simpleExoPlayer.getVideoFormat();
+        if(format != null) {
+            return format.height;
+        }
+        else {
+            return 0;
+        }
     }
 
     private void updateTime(long currentMS, long totalMS) {
