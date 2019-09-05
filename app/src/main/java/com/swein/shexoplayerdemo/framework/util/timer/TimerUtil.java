@@ -5,10 +5,6 @@ import java.util.TimerTask;
 
 import com.swein.shexoplayerdemo.framework.util.thread.ThreadUtil;
 
-/**
- * Created by seokho on 09/02/2018.
- */
-
 public class TimerUtil {
 
     public static Timer createTimerTask(long delay, long period, final Runnable runnable) {
