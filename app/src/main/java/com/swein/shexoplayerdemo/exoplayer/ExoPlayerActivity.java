@@ -132,7 +132,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             public void onPIPClicked() {
                 if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
                     PlayerViewHolder.enterFloatingWindow = true;
-                    playerViewHolder.setMode(PlayerConstants.Mode.FLOATTING);
+                    playerViewHolder.setMode(PlayerConstants.Mode.PIP);
                     createFloatingWindow();
                 }
                 else {
@@ -144,7 +144,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onPlayerFinishPlay() {
-                if(playerViewHolder.getMode() == PlayerConstants.Mode.FLOATTING) {
+                if(playerViewHolder.getMode() == PlayerConstants.Mode.PIP) {
                     playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
                     openDetail();
                 }

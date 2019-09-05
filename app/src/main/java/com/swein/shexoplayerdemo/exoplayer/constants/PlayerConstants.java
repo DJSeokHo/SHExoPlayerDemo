@@ -11,6 +11,6 @@ public class PlayerConstants {
     }
 
     public enum Mode {
-        NORMAL, FLOATTING
+        NORMAL, PIP
     }
 }

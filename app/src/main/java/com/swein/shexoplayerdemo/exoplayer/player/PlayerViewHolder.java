@@ -289,7 +289,7 @@ public class PlayerViewHolder {
 
                 switch (event.getAction()){
                     case MotionEvent.ACTION_DOWN:
-                        if(mode == PlayerConstants.Mode.FLOATTING) {
+                        if(mode == PlayerConstants.Mode.PIP) {
                             currentTime = System.currentTimeMillis();
                             floatingPlayerViewHolderDelegate.onActionDown(event);
                             return true;
@@ -297,7 +297,7 @@ public class PlayerViewHolder {
                         break;
 
                     case MotionEvent.ACTION_MOVE:
-                        if(mode == PlayerConstants.Mode.FLOATTING) {
+                        if(mode == PlayerConstants.Mode.PIP) {
                             floatingPlayerViewHolderDelegate.onActionMove(event);
                             return true;
                         }
@@ -306,7 +306,7 @@ public class PlayerViewHolder {
                     case MotionEvent.ACTION_UP:
                         ILog.iLogDebug(TAG, "touch view cover");
 
-                        if(mode == PlayerConstants.Mode.FLOATTING) {
+                        if(mode == PlayerConstants.Mode.PIP) {
                             if(System.currentTimeMillis() - currentTime > 500) {
                                 currentTime = 0;
                                 return true;
