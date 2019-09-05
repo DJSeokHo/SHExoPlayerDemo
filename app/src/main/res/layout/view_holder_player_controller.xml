@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    >
+    <!-- header -->
+    <FrameLayout
+        android:background="@color/half_transparent"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+
+        <TextView
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="35dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="7pt"
+            android:id="@+id/textViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:padding="3dp"
+            android:background="@color/transparent"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_close"
+            android:id="@+id/imageButtonClose"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="center_vertical|end"
+            android:layout_width="26dp"
+            android:layout_height="26dp" />
+
+    </FrameLayout>
+
+    <!-- time -->
+    <TextView
+        android:paddingTop="5dp"
+        android:gravity="center"
+        android:id="@+id/textViewTime"
+        android:textColor="@color/white"
+        android:textSize="6pt"
+        android:layout_marginBottom="30dp"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/half_transparent"
+        />
+
+    <!-- bottom -->
+    <FrameLayout
+        android:background="@color/half_transparent"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        >
+
+        <LinearLayout
+            android:layout_gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+
+            <ImageButton
+                android:padding="5dp"
+                android:id="@+id/imageButtonPlay"
+                android:src="@drawable/icon_play"
+                android:layout_marginStart="5dp"
+                android:scaleType="centerInside"
+                android:background="@color/transparent"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="30dp" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="30dp" />
+
+            <ImageButton
+                android:padding="5dp"
+                android:id="@+id/imageButtonPIP"
+                android:src="@drawable/icon_pip"
+                android:layout_marginStart="5dp"
+                android:scaleType="centerInside"
+                android:background="@color/transparent"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="30dp" />
+
+            <ImageButton
+                android:padding="5dp"
+                android:id="@+id/imageButtonFullScreen"
+                android:src="@drawable/icon_full_screen"
+                android:layout_marginStart="5dp"
+                android:scaleType="centerInside"
+                android:background="@color/transparent"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="30dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:clickable="true"
+        android:background="@color/half_transparent"
+        android:layout_gravity="center"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:focusable="true">
+
+        <ImageButton
+            android:layout_gravity="center"
+            android:src="@drawable/icon_play"
+            android:scaleType="centerInside"
+            android:background="@color/transparent"
+            android:id="@+id/imageButtonPlayBig"
+            android:layout_width="26dp"
+            android:layout_height="26dp" />
+    </FrameLayout>
+
+</FrameLayout>
