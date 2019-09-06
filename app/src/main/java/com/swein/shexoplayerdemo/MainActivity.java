@@ -17,8 +17,6 @@ import com.swein.shexoplayerdemo.framework.util.toast.ToastUtil;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static String TAG = "MainActivity";
-
     private final static int ACTION_MANAGE_OVERLAY_PERMISSION_CODE = 101;
 
     private boolean closeFlag = false;
@@ -40,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * 检查浮窗权限，用于PIP(画中画)
+     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkPermission() {
         if (!Settings.canDrawOverlays(MainActivity.this)) {
@@ -48,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_CODE);
         }
-        else {
-
-        }
     }
 
+    /**
+     * 检查浮窗权限的结果，不同意权限的话就直接退出，你也可以修改成自己的逻辑
+     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -61,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
                 // SYSTEM_ALERT_WINDOW permission not granted
                 finish();
             }
-            else {
-
-            }
         }
     }
 
+    /**
+     * 连续按两次回退键就退出app
+     */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 

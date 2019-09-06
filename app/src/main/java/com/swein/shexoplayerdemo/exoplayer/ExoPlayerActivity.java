@@ -57,16 +57,29 @@ public class ExoPlayerActivity extends AppCompatActivity {
         frameLayoutPlayerContainer = findViewById(R.id.frameLayoutPlayerContainer);
         frameLayoutOtherContainer = findViewById(R.id.frameLayoutOtherContainer);
 
+        /*
+        初始化播放器的尺寸，16：9
+         */
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(DisplayUtils.getScreenWidthPx(this), (int)(DisplayUtils.getScreenWidthPx(this) * Constants.RATE));
         frameLayoutPlayerContainer.setLayoutParams(layoutParams);
     }
 
+    /**
+     * 初始化播放器
+     */
     private void initPlayer() {
 
         playerViewHolder = new PlayerViewHolder(this);
 
+        /*
+        实现PIP(画中画)的悬浮窗委托(接口)，用匿名对象实现接口
+         */
         playerViewHolder.setFloatingDelegate(new PlayerViewHolder.FloatingPlayerViewHolderDelegate() {
 
+            /*
+            PIP在手机桌面上需要可以拖动，所以需要记录一些坐标
+            这里原理就不再叙述
+             */
             private float lastX;
             private float lastY;
             private float nowX;
@@ -91,7 +104,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 layoutParams.x += tranX;
                 layoutParams.y += tranY;
 
-                // update floating  window position
+                // 更新悬浮窗在桌面上的位置
                 windowManager.updateViewLayout(playerViewHolder.getView(), layoutParams);
 
                 lastX = nowX;
@@ -99,9 +112,15 @@ public class ExoPlayerActivity extends AppCompatActivity {
             }
         });
 
+        /*
+        实现播放器的委托，用匿名对象实现接口
+         */
         playerViewHolder.setDelegate(new PlayerViewHolder.PlayerViewHolderDelegate() {
             @Override
             public void onCloseClicked() {
+                /*
+                关闭播放器，退出activity
+                 */
                 if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
                     frameLayoutPlayerContainer.removeAllViews();
                     finish();
@@ -114,6 +133,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onFullScreenClicked() {
+                /*
+                横屏全画面和竖屏切换
+                 */
                 if(isFullScreen) {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     ThreadUtil.startUIThread(3000, new Runnable() {
@@ -130,6 +152,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onPIPClicked() {
+                /*
+                进入PIP(画中画)模式或者退出PIP模式
+                 */
                 if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
                     PlayerViewHolder.enterFloatingWindow = true;
                     playerViewHolder.setMode(PlayerConstants.Mode.PIP);
@@ -144,6 +169,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onPlayerFinishPlay() {
+                /*
+                当播放器播放完成后，自动退出PIP模式
+                 */
                 if(playerViewHolder.getMode() == PlayerConstants.Mode.PIP) {
                     playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
                     openDetail();
@@ -158,6 +186,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         playerViewHolder.setTitle("Title");
 
+        /*
+        这里作为测试，你可以在这里控制播放器的播放内容
+        不用我说，你也知道。。。这里只能3选1，要么是RTMP的直播流，要么是MP4的文件，要么是HLS的流文件
+         */
         playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
 //        playerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
 //        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
@@ -166,8 +198,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     /**
-     * need add android:configChanges="orientation|keyboard|layoutDirection|screenSize" in the <activity> tag
-     * @param newConfig
+     * 横竖屏监听
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -183,6 +214,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
         toggleFullScreen();
     }
 
+    /**
+     * 横屏时就全屏播放，并且隐藏状态栏
+     * 竖屏时就显示状态栏
+     */
     private void toggleFullScreen() {
 
         if(isFullScreen) {
@@ -224,6 +259,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 退出PIP(画中画模式)
+     * 回到正常的activity画面
+     */
     private void openDetail() {
 
         windowManager.removeViewImmediate(playerViewHolder.getView());
@@ -240,40 +279,48 @@ public class ExoPlayerActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * 进入PIP(画中画模式)
+     */
     private void createFloatingWindow() {
 
         ILog.iLogDebug(TAG, "createFloatingWindow");
 
         IntentUtil.intentStartActionBackToHome(ExoPlayerActivity.this);
 
+        /*
+        ThreadUtil 是线程池的封装工具类
+        先startThread开启线程，完成操作后在Runnable内部再用startUIThread来回到主线程更新UI，只有这么好用了，谁用谁知道。
+         */
         ThreadUtil.startThread(new Runnable() {
             @Override
             public void run() {
 
                 windowManager = (WindowManager) getApplication().getSystemService(WINDOW_SERVICE);
 
-                // TYPE_SYSTEM_ALERT allow receive event
-                // TYPE_SYSTEM_OVERLAY over system
                 layoutParams = new WindowManager.LayoutParams();
                 layoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT | WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
-                // FLAG_NOT_TOUCH_MODAL not block event pass to behind
-                // FLAG_NOT_FOCUSABLE
                 layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 
-                // floating window position
                 layoutParams.gravity = Gravity.CENTER;
 
                 layoutParams.x = 0;
                 layoutParams.y = 0;
 
-                // floating window size
+
+                /*
+                画中画模式，播放器窗口的大小，我这里长是250dp，宽就按16:9自动计算，你可以改成你想要的大小
+                 */
                 layoutParams.width = DensityUtil.dip2px(ExoPlayerActivity.this, 250);
                 layoutParams.height = DensityUtil.dip2px(ExoPlayerActivity.this, (int)(250 * Constants.RATE));
 
-                // floating window background
                 layoutParams.format = PixelFormat.TRANSPARENT;
 
+                /*
+                ThreadUtil 是线程池的封装工具类
+                先startThread开启线程，完成操作后在Runnable内部再用startUIThread来回到主线程更新UI，只有这么好用了，谁用谁知道。
+                 */
                 ThreadUtil.startUIThread(0, new Runnable() {
                     @Override
                     public void run() {
@@ -306,18 +353,33 @@ public class ExoPlayerActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    /**
+     * 继续播放
+     */
     private void resumePlay() {
         if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
             playerViewHolder.resumePlay();
         }
     }
 
+    /**
+     * 暂停播放
+     */
     private void pausePlay() {
         if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
             playerViewHolder.pause();
         }
     }
 
+    /**
+     * 销毁播放器
+     * 养成好习惯，手动释放资源，方便内存回收
+     * 养成好习惯，手动释放资源，方便内存回收
+     * 养成好习惯，手动释放资源，方便内存回收
+     *
+     * 说三遍才会印象深刻
+     *
+     */
     private void destroyPlayer() {
         if(playerViewHolder != null) {
             playerViewHolder.stopWithReset();

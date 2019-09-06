@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.swein.shexoplayerdemo">
 
+    <!-- 有些权限是多余的，不用完全照抄 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -26,6 +27,10 @@
         <activity android:name=".exoplayer.ExoPlayerActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboard|layoutDirection|screenSize"/>
+            <!--
+             orientation|keyboard|layoutDirection|screenSize
+             用于横竖屏幕切换时，不用重新走一次activity的生命周期
+             -->
         <activity
             android:name=".MainActivity"
             >
