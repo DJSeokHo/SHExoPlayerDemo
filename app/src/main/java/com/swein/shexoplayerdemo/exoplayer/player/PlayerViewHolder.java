@@ -263,10 +263,11 @@ public class PlayerViewHolder {
 //            ILog.iLogDebug(TAG, "height " + simpleExoPlayer.getVideoFormat().height);
 
             /*
-            读取完成时，开始渲染第一帧画面时，隐藏读取UI设置进度条的当前时间和总时长
+            读取完成时，开始渲染第一帧画面时，
+            隐藏读取UI
+            设置进度条的当前时间和总时长
             如果是直播流RTMP的话，就不需要进度条了。
              */
-
             hideProgress();
 
             if(urlType == PlayerConstants.URLType.RTMP) {
@@ -313,13 +314,22 @@ public class PlayerViewHolder {
         setListener();
     }
 
+    /**
+     * 绑定控件
+     */
     private void findView() {
         frameLayoutProgress = view.findViewById(R.id.frameLayoutProgress);
         frameLayoutControllerContainer = view.findViewById(R.id.frameLayoutControllerContainer);
 
+        /*
+        用于处理点击事件
+         */
         viewCover = view.findViewById(R.id.viewCover);
     }
 
+    /**
+     * 初始化并载入播放器控制容器
+     */
     private void initPlayerController() {
         playerControllerViewHolder = new PlayerControllerViewHolder(view.getContext(), new PlayerControllerViewHolder.PlayerControllerViewHolderDelegate() {
             @Override
@@ -340,6 +350,9 @@ public class PlayerViewHolder {
                         break;
                 }
 
+                /*
+                更新播放器控制器UI
+                 */
                 playerControllerViewHolder.updateControllerUI(playerState);
             }
 
@@ -361,17 +374,26 @@ public class PlayerViewHolder {
                         break;
                 }
 
+                 /*
+                更新播放器控制器UI
+                 */
                 playerControllerViewHolder.updateControllerUI(playerState);
             }
 
             @Override
             public void onButtonFullScreenClicked() {
+                /*
+                传递给ExoPlayerActivity来处理全屏
+                 */
                 playerViewHolderDelegate.onFullScreenClicked();
             }
 
             @Override
             public void onButtonPIPClicked() {
                 toggleController();
+                 /*
+                传递给ExoPlayerActivity来处理PIP模式
+                 */
                 playerViewHolderDelegate.onPIPClicked();
             }
 
@@ -393,10 +415,17 @@ public class PlayerViewHolder {
             }
         });
 
+        /*
+        加载播放器控制界面 到 播放器控制界面容器
+         */
         frameLayoutControllerContainer.addView(playerControllerViewHolder.getView());
 
     }
 
+    /**
+     * 切换 PIP模式或正常模式下的播放器控制界面UI
+     * @param mode
+     */
     public void setMode(PlayerConstants.Mode mode) {
         this.mode = mode;
 
@@ -404,10 +433,16 @@ public class PlayerViewHolder {
 
     }
 
+    /**
+     * 改变全屏时播放器控制界面的UI
+     */
     public void setFullScreen() {
         playerControllerViewHolder.setFullScreen();
     }
 
+    /**
+     * 改变正常时播放器控制界面的UI
+     */
     public void setNormalScreen() {
         playerControllerViewHolder.setNormalScreen();
     }
@@ -416,6 +451,14 @@ public class PlayerViewHolder {
         return mode;
     }
 
+    /**
+     * viewCover 是用来接收和处理点击事件的一个view
+     * 可以在xml里确认
+     * 播放器容器，播放器，播放器控制器容器，播放器控制器，点击层
+     * 的层级关系
+     *
+     * 分离各层，单独控制，是核心
+     */
     private void setListener() {
 
         viewCover.setOnTouchListener(new View.OnTouchListener() {
@@ -462,35 +505,46 @@ public class PlayerViewHolder {
 
     }
 
+    /**
+     * 设置地址
+     * @param url 播放的链接的地址
+     * @param urlType 播放的链接的类型
+     */
     public void setUrl(String url, PlayerConstants.URLType urlType) {
         this.url = url;
         this.urlType = urlType;
 
     }
 
+    /**
+     * 设置委托(接口)
+     */
     public void setDelegate(PlayerViewHolderDelegate playerViewHolderDelegate) {
         this.playerViewHolderDelegate = playerViewHolderDelegate;
-
     }
 
+    /**
+     * 设置PIP模式的委托(接口)
+     * @param floatingPlayerViewHolderDelegate
+     */
     public void setFloatingDelegate(FloatingPlayerViewHolderDelegate floatingPlayerViewHolderDelegate) {
         this.floatingPlayerViewHolderDelegate = floatingPlayerViewHolderDelegate;
-
     }
 
+    /**
+     * 初始化EXO播放器
+     */
     public void initPlayer() {
 
         exoPlayerView = view.findViewById(R.id.exoPlayerView);
 
         exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
-        //initiate Player
-        //Create a default TrackSelector
+
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        //Create the player
         simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(view.getContext(), trackSelector);
 
         simpleExoPlayer.addListener(eventListener);
@@ -499,6 +553,7 @@ public class PlayerViewHolder {
 
         exoPlayerView.setPlayer(simpleExoPlayer);
         exoPlayerView.setUseController(false);
+
         createMediaSource();
         resumePlay();
 
@@ -511,9 +566,11 @@ public class PlayerViewHolder {
         else {
             playerControllerViewHolder.setVODType();
         }
-
     }
 
+    /**
+     * 开始同步进度条和时间
+     */
     private void startSync() {
 
         if(urlType == PlayerConstants.URLType.RTMP) {
@@ -565,6 +622,9 @@ public class PlayerViewHolder {
         playerControllerViewHolder.syncTime(current, total);
     }
 
+    /**
+     * 停止同步进度条和时间
+     */
     private void stopSync() {
 
         if(urlType == PlayerConstants.URLType.RTMP) {
@@ -574,14 +634,23 @@ public class PlayerViewHolder {
         TimerUtil.cancelTimerTask(timer);
     }
 
+    /**
+     * 设置进度条位置
+     */
     private void setSeekBar(int max, int progress) {
         playerControllerViewHolder.setSeekBar(max, progress);
     }
 
+    /**
+     * 设置播放器的标题
+     */
     public void setTitle(String title) {
         playerControllerViewHolder.setTitle(title);
     }
 
+    /**
+     * 建立视频源
+     */
     private void createMediaSource() {
 
         switch (urlType) {
@@ -607,22 +676,34 @@ public class PlayerViewHolder {
         simpleExoPlayer.prepare(videoSource);
     }
 
+    /**
+     * 播放器重新读取
+     */
     private void reloadPlay() {
         createMediaSource();
         resumePlay();
     }
 
+    /**
+     * 播放器恢复播放
+     */
     public void resumePlay() {
         simpleExoPlayer.setPlayWhenReady(true);
         playerState = PlayerConstants.PlayerState.PLAY;
 
     }
 
+    /**
+     * 播放器暂停播放
+     */
     public void pause() {
         simpleExoPlayer.setPlayWhenReady(false);
         playerState = PlayerConstants.PlayerState.PAUSE;
     }
 
+    /**
+     * 播放器停止播放
+     */
     public void stopWithReset() {
         simpleExoPlayer.stop(true);
         playerState = PlayerConstants.PlayerState.STOP;
@@ -634,10 +715,17 @@ public class PlayerViewHolder {
         simpleExoPlayer.seekTo(ms);
     }
 
+    /**
+     * 获取视频总长
+     * long类型，意思是视频的总帧数
+     */
     private long getDuration() {
         return simpleExoPlayer.getDuration();
     }
 
+    /**
+     * 获取当前帧数
+     */
     private long getCurrentPosition() {
         if(simpleExoPlayer != null) {
             return simpleExoPlayer.getCurrentPosition();
@@ -686,6 +774,15 @@ public class PlayerViewHolder {
         return view;
     }
 
+    /**
+     * 销毁播放器，取消计时器
+     * 养成好习惯，手动释放资源，方便内存回收
+     * 养成好习惯，手动释放资源，方便内存回收
+     * 养成好习惯，手动释放资源，方便内存回收
+     *
+     * 说三遍才会印象深刻
+     *
+     */
     public void destroy() {
 
         if(simpleExoPlayer != null) {
