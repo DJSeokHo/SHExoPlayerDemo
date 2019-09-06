@@ -158,9 +158,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         playerViewHolder.setTitle("Title");
 
-//        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
+        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
 //        playerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
-        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
+//        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
 
         playerViewHolder.initPlayer();
     }

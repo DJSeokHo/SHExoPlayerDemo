@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer2.Format;
 import com.swein.shexoplayerdemo.R;
+import com.swein.shexoplayerdemo.exoplayer.player.controller.PlayerControllerViewHolder;
 import com.swein.shexoplayerdemo.framework.util.date.DateUtil;
 import com.swein.shexoplayerdemo.framework.util.debug.log.ILog;
 import com.swein.shexoplayerdemo.framework.util.timer.TimerUtil;
@@ -77,15 +78,8 @@ public class PlayerViewHolder {
     private PlayerViewHolderDelegate playerViewHolderDelegate;
     private FloatingPlayerViewHolderDelegate floatingPlayerViewHolderDelegate;
 
-    private FrameLayout frameLayoutController;
-    private ImageButton imageButtonClose;
-    private ImageButton imageButtonPlay;
-    private ImageButton imageButtonPlayBig;
-    private ImageButton imageButtonFullScreen;
-    private ImageButton imageButtonPIP;
-    private SeekBar seekBar;
-    private TextView textViewTitle;
-    private TextView textViewTime;
+    private PlayerControllerViewHolder playerControllerViewHolder;
+    private FrameLayout frameLayoutControllerContainer;
 
     private View viewCover;
 
@@ -140,9 +134,9 @@ public class PlayerViewHolder {
             if(playWhenReady && PLAYER_STATE_FINISHED == playbackState) {
                 // play finished
                 playerState = PlayerConstants.PlayerState.STOP;
-                updateControllerUI();
-                frameLayoutController.startAnimation(AnimationUtil.show(view.getContext()));
-                frameLayoutController.setVisibility(View.VISIBLE);
+                playerControllerViewHolder.updateControllerUI(playerState);
+                frameLayoutControllerContainer.startAnimation(AnimationUtil.show(view.getContext()));
+                frameLayoutControllerContainer.setVisibility(View.VISIBLE);
                 if(urlType != PlayerConstants.URLType.RTMP) {
                     setSeekBar(0, 0);
                 }
@@ -200,15 +194,15 @@ public class PlayerViewHolder {
 
         @Override
         public void onRenderedFirstFrame() {
-            ILog.iLogDebug(TAG, "onRenderedFirstFrame");
-            ILog.iLogDebug(TAG, simpleExoPlayer.getDuration());
-            ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
-            ILog.iLogDebug(TAG, simpleExoPlayer.getContentDuration());
-            ILog.iLogDebug(TAG, simpleExoPlayer.getTotalBufferedDuration());
-
-            ILog.iLogDebug(TAG, "getVideoFormat " + (simpleExoPlayer.getVideoFormat() == null));
-            ILog.iLogDebug(TAG, "width " + simpleExoPlayer.getVideoFormat().width);
-            ILog.iLogDebug(TAG, "height " + simpleExoPlayer.getVideoFormat().height);
+//            ILog.iLogDebug(TAG, "onRenderedFirstFrame");
+//            ILog.iLogDebug(TAG, simpleExoPlayer.getDuration());
+//            ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
+//            ILog.iLogDebug(TAG, simpleExoPlayer.getContentDuration());
+//            ILog.iLogDebug(TAG, simpleExoPlayer.getTotalBufferedDuration());
+//
+//            ILog.iLogDebug(TAG, "getVideoFormat " + (simpleExoPlayer.getVideoFormat() == null));
+//            ILog.iLogDebug(TAG, "width " + simpleExoPlayer.getVideoFormat().width);
+//            ILog.iLogDebug(TAG, "height " + simpleExoPlayer.getVideoFormat().height);
 
             hideProgress();
 
@@ -243,35 +237,107 @@ public class PlayerViewHolder {
     public PlayerViewHolder(Context context) {
         view = ViewUtil.inflateView(context, R.layout.view_holder_player, null);
         findView();
+        initPlayerController();
         setListener();
     }
 
     private void findView() {
         frameLayoutProgress = view.findViewById(R.id.frameLayoutProgress);
-        frameLayoutController = view.findViewById(R.id.frameLayoutController);
-        imageButtonClose = view.findViewById(R.id.imageButtonClose);
-        imageButtonPlay = view.findViewById(R.id.imageButtonPlay);
-        imageButtonPlayBig = view.findViewById(R.id.imageButtonPlayBig);
-        imageButtonFullScreen = view.findViewById(R.id.imageButtonFullScreen);
-        imageButtonPIP = view.findViewById(R.id.imageButtonPIP);
-
-        textViewTitle = view.findViewById(R.id.textViewTitle);
-        textViewTime = view.findViewById(R.id.textViewTime);
+        frameLayoutControllerContainer = view.findViewById(R.id.frameLayoutControllerContainer);
 
         viewCover = view.findViewById(R.id.viewCover);
-        seekBar = view.findViewById(R.id.seekBar);
+    }
+
+    private void initPlayerController() {
+        playerControllerViewHolder = new PlayerControllerViewHolder(view.getContext(), new PlayerControllerViewHolder.PlayerControllerViewHolderDelegate() {
+            @Override
+            public void onButtonCloseClicked() {
+                playerViewHolderDelegate.onCloseClicked();
+            }
+
+            @Override
+            public void onButtonPlayClicked() {
+                switch (playerState) {
+                    case PLAY:
+                        stopWithReset();
+                        break;
+
+                    case STOP:
+                        reloadPlay();
+                        toggleController();
+                        break;
+                }
+
+                playerControllerViewHolder.updateControllerUI(playerState);
+            }
+
+            @Override
+            public void onButtonPlayBigClicked() {
+                switch (playerState) {
+                    case PLAY:
+                        pause();
+                        break;
+
+                    case PAUSE:
+                        resumePlay();
+                        toggleController();
+                        break;
+
+                    case STOP:
+                        reloadPlay();
+                        toggleController();
+                        break;
+                }
+
+                playerControllerViewHolder.updateControllerUI(playerState);
+            }
+
+            @Override
+            public void onButtonFullScreenClicked() {
+                playerViewHolderDelegate.onFullScreenClicked();
+            }
+
+            @Override
+            public void onButtonPIPClicked() {
+                toggleController();
+                playerViewHolderDelegate.onPIPClicked();
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateTime(seekBar.getProgress(), getDuration());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                stopSync();
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ILog.iLogDebug(TAG, seekBar.getProgress());
+                seekTo(seekBar.getProgress());
+                showProgress();
+            }
+        });
+
+        frameLayoutControllerContainer.addView(playerControllerViewHolder.getView());
 
     }
 
     public void setMode(PlayerConstants.Mode mode) {
         this.mode = mode;
 
-        if(mode == PlayerConstants.Mode.NORMAL) {
-            imageButtonFullScreen.setVisibility(View.VISIBLE);
-        }
-        else {
-            imageButtonFullScreen.setVisibility(View.GONE);
-        }
+        playerControllerViewHolder.setMode(mode);
+
+    }
+
+    public void setFullScreen() {
+        playerControllerViewHolder.setFullScreen();
+    }
+
+    public void setNormalScreen() {
+        playerControllerViewHolder.setNormalScreen();
     }
 
     public PlayerConstants.Mode getMode() {
@@ -321,71 +387,7 @@ public class PlayerViewHolder {
             }
         });
 
-        imageButtonPIP.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                toggleController();
-                playerViewHolderDelegate.onPIPClicked();
-            }
-        });
-
-        imageButtonFullScreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playerViewHolderDelegate.onFullScreenClicked();
-            }
-        });
-
-        imageButtonClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playerViewHolderDelegate.onCloseClicked();
-            }
-        });
-
-        imageButtonPlayBig.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                switch (playerState) {
-                    case PLAY:
-                        pause();
-                        break;
-
-                    case PAUSE:
-                        resumePlay();
-                        toggleController();
-                        break;
-
-                    case STOP:
-                        reloadPlay();
-                        toggleController();
-                        break;
-                }
-
-                updateControllerUI();
-            }
-        });
-
-        imageButtonPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                switch (playerState) {
-                    case PLAY:
-                        stopWithReset();
-                        break;
-
-                    case STOP:
-                        reloadPlay();
-                        toggleController();
-                        break;
-                }
-
-                updateControllerUI();
-            }
-        });
     }
 
     public void setUrl(String url, PlayerConstants.URLType urlType) {
@@ -428,16 +430,14 @@ public class PlayerViewHolder {
         createMediaSource();
         resumePlay();
 
-        updateControllerUI();
+        playerControllerViewHolder.updateControllerUI(playerState);
         toggleController();
 
         if(urlType == PlayerConstants.URLType.RTMP) {
-            seekBar.setEnabled(false);
-            textViewTime.setVisibility(View.GONE);
+            playerControllerViewHolder.setRTMPType();
         }
         else {
-            seekBar.setEnabled(true);
-            textViewTime.setVisibility(View.VISIBLE);
+            playerControllerViewHolder.setVODType();
         }
 
     }
@@ -452,10 +452,9 @@ public class PlayerViewHolder {
             @Override
             public void run() {
                 ILog.iLogDebug(TAG, getCurrentPosition());
-                if(seekBar != null) {
-                    seekBar.setProgress((int)getCurrentPosition());
-                    updateTime(getCurrentPosition(), getDuration());
-                }
+
+                playerControllerViewHolder.syncSeekBar((int)getCurrentPosition());
+                updateTime(getCurrentPosition(), getDuration());
             }
         });
     }
@@ -491,7 +490,7 @@ public class PlayerViewHolder {
 
         String current = DateUtil.getDateFromMilliSeconds(currentMS);
         String total = DateUtil.getDateFromMilliSeconds(totalMS);
-        textViewTime.setText(String.format(view.getContext().getString(R.string.player_time), current, total));
+        playerControllerViewHolder.syncTime(current, total);
     }
 
     private void stopSync() {
@@ -504,34 +503,11 @@ public class PlayerViewHolder {
     }
 
     private void setSeekBar(int max, int progress) {
-
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                updateTime(seekBar.getProgress(), getDuration());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                stopSync();
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                ILog.iLogDebug(TAG, seekBar.getProgress());
-                seekTo(seekBar.getProgress());
-                showProgress();
-                toggleController();
-            }
-        });
-
-        seekBar.setMax(max);
-        seekBar.setProgress(progress);
+        playerControllerViewHolder.setSeekBar(max, progress);
     }
 
     public void setTitle(String title) {
-        textViewTitle.setText(title);
+        playerControllerViewHolder.setTitle(title);
     }
 
     private void createMediaSource() {
@@ -559,14 +535,6 @@ public class PlayerViewHolder {
         simpleExoPlayer.prepare(videoSource);
     }
 
-    public void setFullScreen() {
-        imageButtonFullScreen.setImageResource(R.drawable.icon_normal_screen);
-    }
-
-    public void setNormalScreen() {
-        imageButtonFullScreen.setImageResource(R.drawable.icon_full_screen);
-    }
-
     private void reloadPlay() {
         createMediaSource();
         resumePlay();
@@ -589,27 +557,6 @@ public class PlayerViewHolder {
         videoSource = null;
     }
 
-    private void updateControllerUI() {
-
-        switch (playerState) {
-
-            case PLAY:
-                imageButtonPlayBig.setImageResource(R.drawable.icon_pause);
-                imageButtonPlay.setImageResource(R.drawable.icon_stop);
-                break;
-
-            case PAUSE:
-                imageButtonPlayBig.setImageResource(R.drawable.icon_play);
-                imageButtonPlay.setImageResource(R.drawable.icon_stop);
-                break;
-
-            case STOP:
-                imageButtonPlayBig.setImageResource(R.drawable.icon_play);
-                imageButtonPlay.setImageResource(R.drawable.icon_play);
-                break;
-        }
-    }
-
     private void seekTo(long ms) {
         ILog.iLogDebug(TAG, "seek to " + ms);
         simpleExoPlayer.seekTo(ms);
@@ -620,7 +567,11 @@ public class PlayerViewHolder {
     }
 
     private long getCurrentPosition() {
-        return simpleExoPlayer.getCurrentPosition();
+        if(simpleExoPlayer != null) {
+            return simpleExoPlayer.getCurrentPosition();
+        }
+
+        return 0;
     }
 
     public PlayerConstants.PlayerState getPlayerState() {
@@ -629,14 +580,14 @@ public class PlayerViewHolder {
 
     private void toggleController() {
 
-        if(frameLayoutController.getVisibility() == View.VISIBLE) {
+        if(frameLayoutControllerContainer.getVisibility() == View.VISIBLE) {
 
-            frameLayoutController.startAnimation(AnimationUtil.hide(view.getContext()));
-            frameLayoutController.setVisibility(View.GONE);
+            frameLayoutControllerContainer.startAnimation(AnimationUtil.hide(view.getContext()));
+            frameLayoutControllerContainer.setVisibility(View.GONE);
         }
         else {
-            frameLayoutController.startAnimation(AnimationUtil.show(view.getContext()));
-            frameLayoutController.setVisibility(View.VISIBLE);
+            frameLayoutControllerContainer.startAnimation(AnimationUtil.show(view.getContext()));
+            frameLayoutControllerContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -689,6 +640,11 @@ public class PlayerViewHolder {
             simpleExoPlayer.release();
             simpleExoPlayer = null;
             videoSource = null;
+        }
+
+        if(playerControllerViewHolder != null) {
+            frameLayoutControllerContainer.removeView(playerControllerViewHolder.getView());
+            playerControllerViewHolder = null;
         }
     }
 
