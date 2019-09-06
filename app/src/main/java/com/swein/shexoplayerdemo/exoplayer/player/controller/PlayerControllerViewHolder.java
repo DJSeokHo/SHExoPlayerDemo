@@ -12,6 +12,9 @@ import com.swein.shexoplayerdemo.framework.util.view.ViewUtil;
 
 public class PlayerControllerViewHolder {
 
+    /**
+     * 播放器控制器的委托(接口)
+     */
     public interface PlayerControllerViewHolderDelegate {
 
         void onButtonCloseClicked();
