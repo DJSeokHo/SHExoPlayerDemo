@@ -49,8 +49,15 @@ import java.util.Timer;
 import com.swein.shexoplayerdemo.exoplayer.constants.PlayerConstants;
 import com.swein.shexoplayerdemo.framework.util.animation.AnimationUtil;
 
+/**
+ * 播放器容器类
+ * 用于控制播放器，比如播放，暂停，停止，改变UI，等等。。。
+ */
 public class PlayerViewHolder {
 
+    /*
+        播放器容器的委托(接口)
+     */
     public interface PlayerViewHolderDelegate {
         void onCloseClicked();
         void onFullScreenClicked();
@@ -58,6 +65,9 @@ public class PlayerViewHolder {
         void onPlayerFinishPlay();
     }
 
+    /*
+        PIP(画中画)播放器的委托(接口)
+     */
     public interface FloatingPlayerViewHolderDelegate {
         void onActionDown(MotionEvent event);
         void onActionMove(MotionEvent event);
@@ -65,8 +75,13 @@ public class PlayerViewHolder {
 
     private final static String TAG = "PlayerViewHolder";
 
+    // 停止播放
     private final static int PLAYER_STATE_STOP = 1;
+
+    // 播放
     private final static int PLAYER_STATE_PLAYING = 3;
+
+    // 播放结束时
     private final static int PLAYER_STATE_FINISHED = 4;
 
     private View view;
@@ -94,45 +109,69 @@ public class PlayerViewHolder {
 
     private FrameLayout frameLayoutProgress;
 
+    /**
+     * 播放器时间监听，必须有
+     */
     private Player.EventListener eventListener = new Player.EventListener() {
 
         @Override
         public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
-
+            /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
             ILog.iLogDebug(TAG, "onTracksChanged");
+             /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
             ILog.iLogDebug(TAG, "onLoadingChanged " + isLoading);
+             /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
+            /*
+             * playWhenReady 意思是播放器的状态
+             */
             ILog.iLogDebug(TAG, "onPlayerStateChanged " + playWhenReady + " " + playbackState);
 
             if(!playWhenReady) {
+                /*
+                不播放，停止更新进度条和时间
+                 */
                 stopSync();
                 return;
             }
 
             if(playWhenReady && PLAYER_STATE_PLAYING == playbackState) {
+                 /*
+                开始播放，开始更新进度条和时间
+                 */
                 startSync();
                 return;
             }
 
             if(playWhenReady && PLAYER_STATE_STOP == playbackState) {
+                /*
+                停止播放，停止更新进度条和时间
+                 */
                 stopSync();
                 return;
             }
 
             if(playWhenReady && PLAYER_STATE_FINISHED == playbackState) {
-                // play finished
+                /*
+                播放完的时候，停止更新进度条和时间，重置进度条和时间，改变UI
+                 */
                 playerState = PlayerConstants.PlayerState.STOP;
                 playerControllerViewHolder.updateControllerUI(playerState);
                 frameLayoutControllerContainer.startAnimation(AnimationUtil.show(view.getContext()));
@@ -149,12 +188,16 @@ public class PlayerViewHolder {
 
         @Override
         public void onRepeatModeChanged(int repeatMode) {
-
+            /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
+             /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
@@ -166,20 +209,34 @@ public class PlayerViewHolder {
         @Override
         public void onPositionDiscontinuity(int reason) {
             ILog.iLogDebug(TAG, "onPositionDiscontinuity");
+             /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
+             /*
+            这里不需要，我就没有管
+             */
         }
 
         @Override
         public void onSeekProcessed() {
+             /*
+            这里不需要，我就没有管
+            拉进度条，播放器处理完成时，你可以用
+            播放器的 simpleExoPlayer.getCurrentPosition() 这个方法来获取当前进度
+            进度是long类型，是当前所处的帧的位置
+             */
             ILog.iLogDebug(TAG, "onSeekProcessed");
             ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
         }
     };
 
+    /*
+    视频类监听，必须要
+     */
     private VideoListener videoListener = new VideoListener() {
 
         @Override
@@ -194,6 +251,7 @@ public class PlayerViewHolder {
 
         @Override
         public void onRenderedFirstFrame() {
+
 //            ILog.iLogDebug(TAG, "onRenderedFirstFrame");
 //            ILog.iLogDebug(TAG, simpleExoPlayer.getDuration());
 //            ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
@@ -203,6 +261,11 @@ public class PlayerViewHolder {
 //            ILog.iLogDebug(TAG, "getVideoFormat " + (simpleExoPlayer.getVideoFormat() == null));
 //            ILog.iLogDebug(TAG, "width " + simpleExoPlayer.getVideoFormat().width);
 //            ILog.iLogDebug(TAG, "height " + simpleExoPlayer.getVideoFormat().height);
+
+            /*
+            读取完成时，开始渲染第一帧画面时，隐藏读取UI设置进度条的当前时间和总时长
+            如果是直播流RTMP的话，就不需要进度条了。
+             */
 
             hideProgress();
 
@@ -214,6 +277,10 @@ public class PlayerViewHolder {
         }
     };
 
+    /*
+     * 这里我没有使用播放器的音量控制，需要的话可以自己实现
+     * 我就只是用是系统按钮来控制音量
+     */
     private AudioListener audioListener = new AudioListener() {
 
         @Override
@@ -228,10 +295,11 @@ public class PlayerViewHolder {
 
         @Override
         public void onVolumeChanged(float volume) {
-            ILog.iLogDebug(TAG, "onVolumeChanged " + volume);
+
         }
     };
 
+    // 计时器
     private Timer timer;
 
     public PlayerViewHolder(Context context) {
