@@ -302,6 +302,10 @@ public class PlayerViewHolder {
     // 计时器
     private Timer timer;
 
+    /**
+     * 构造方法
+     * @param context 上下文
+     */
     public PlayerViewHolder(Context context) {
         view = ViewUtil.inflateView(context, R.layout.view_holder_player, null);
         findView();
