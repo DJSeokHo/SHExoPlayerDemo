@@ -26,6 +26,24 @@ import com.swein.shexoplayerdemo.framework.util.size.DensityUtil;
 import com.swein.shexoplayerdemo.framework.util.theme.ThemeUtil;
 import com.swein.shexoplayerdemo.framework.util.thread.ThreadUtil;
 
+/**
+ * 播放器容器，播放器，播放器控制器容器，播放器控制器，点击层
+ * 的层级关系
+ *
+ * Activity 承载播放器的容器
+ * 播放器的容器承载播放器本身和控制器的容器
+ * 控制器的容器承载播放器的控制层
+ *
+ * 自底向上分别是
+ *
+ * 1. 主activity
+ * 2. 播放器容器
+ * 3. 播放器
+ * 4. 播放器控制界面的容器
+ * 5. 播放器控制界面
+ *
+ * 分离各层，单独控制，是核心
+ */
 public class ExoPlayerActivity extends AppCompatActivity {
 
     private final static String TAG = "ExoPlayerActivity";
