@@ -215,7 +215,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     /**
-     * 横屏时就全屏播放，并且隐藏状态栏
+     * 横屏时就全屏播放，并且隐藏系统状态栏
      * 竖屏时就显示状态栏
      */
     private void toggleFullScreen() {
@@ -224,6 +224,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             frameLayoutOtherContainer.setVisibility(View.GONE);
 
+            /*
+            全屏观看，隐藏顶部系统状态栏
+             */
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -290,7 +293,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         /*
         ThreadUtil 是线程池的封装工具类
-        先startThread开启线程，完成操作后在Runnable内部再用startUIThread来回到主线程更新UI，只有这么好用了，谁用谁知道。
+        先startThread开启线程，完成你想要的操作后
+        在Runnable内部继续用startUIThread来回到主线程更新UI
+        只有这么好用了，谁用谁知道。
          */
         ThreadUtil.startThread(new Runnable() {
             @Override
@@ -319,7 +324,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
                 /*
                 ThreadUtil 是线程池的封装工具类
-                先startThread开启线程，完成操作后在Runnable内部再用startUIThread来回到主线程更新UI，只有这么好用了，谁用谁知道。
+                先startThread开启线程，完成你想要的操作后
+                在Runnable内部继续用startUIThread来回到主线程更新UI
+                只有这么好用了，谁用谁知道。
                  */
                 ThreadUtil.startUIThread(0, new Runnable() {
                     @Override
@@ -355,6 +362,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     /**
      * 继续播放
+     * 用于响应activity的生命周期
      */
     private void resumePlay() {
         if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
@@ -364,6 +372,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     /**
      * 暂停播放
+     * 用于响应activity的生命周期
      */
     private void pausePlay() {
         if(playerViewHolder != null && !PlayerViewHolder.enterFloatingWindow) {
@@ -373,6 +382,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     /**
      * 销毁播放器
+     *
      * 养成好习惯，手动释放资源，方便内存回收
      * 养成好习惯，手动释放资源，方便内存回收
      * 养成好习惯，手动释放资源，方便内存回收

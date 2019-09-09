@@ -6,19 +6,11 @@ import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
-import com.google.android.exoplayer2.Format;
-import com.swein.shexoplayerdemo.R;
-import com.swein.shexoplayerdemo.exoplayer.player.controller.PlayerControllerViewHolder;
-import com.swein.shexoplayerdemo.framework.util.date.DateUtil;
-import com.swein.shexoplayerdemo.framework.util.debug.log.ILog;
-import com.swein.shexoplayerdemo.framework.util.timer.TimerUtil;
-import com.swein.shexoplayerdemo.framework.util.view.ViewUtil;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -43,11 +35,16 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
+import com.swein.shexoplayerdemo.R;
+import com.swein.shexoplayerdemo.exoplayer.constants.PlayerConstants;
+import com.swein.shexoplayerdemo.exoplayer.player.controller.PlayerControllerViewHolder;
+import com.swein.shexoplayerdemo.framework.util.animation.AnimationUtil;
+import com.swein.shexoplayerdemo.framework.util.date.DateUtil;
+import com.swein.shexoplayerdemo.framework.util.debug.log.ILog;
+import com.swein.shexoplayerdemo.framework.util.timer.TimerUtil;
+import com.swein.shexoplayerdemo.framework.util.view.ViewUtil;
 
 import java.util.Timer;
-
-import com.swein.shexoplayerdemo.exoplayer.constants.PlayerConstants;
-import com.swein.shexoplayerdemo.framework.util.animation.AnimationUtil;
 
 /**
  * 播放器容器类
