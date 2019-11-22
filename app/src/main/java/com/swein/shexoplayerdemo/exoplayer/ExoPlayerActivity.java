@@ -5,7 +5,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -170,19 +173,27 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onPIPClicked() {
-                /*
-                进入PIP(画中画)模式或者退出PIP模式
-                 */
-                if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
-                    PlayerViewHolder.enterFloatingWindow = true;
-                    playerViewHolder.setMode(PlayerConstants.Mode.PIP);
-                    createFloatingWindow();
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (!Settings.canDrawOverlays(ExoPlayerActivity.this)) {
+                        if (! Settings.canDrawOverlays(ExoPlayerActivity.this)) {
+                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:" + getPackageName()));
+                            // 这里没有添加返回结果的检查，即没有在onActivityResult里做检查，如果有需要自行添加
+                            startActivityForResult(intent,999);
+                        }
+                    }
+                    else {
+                         /*
+                            进入PIP(画中画)模式或者退出PIP模式
+                             */
+                        togglePIP();
+                    }
                 }
                 else {
-                    PlayerViewHolder.enterFloatingWindow = false;
-                    playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
-                    openDetail();
+                    togglePIP();
                 }
+
             }
 
             @Override
@@ -213,6 +224,19 @@ public class ExoPlayerActivity extends AppCompatActivity {
 //        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
 
         playerViewHolder.initPlayer();
+    }
+
+    private void togglePIP() {
+        if(playerViewHolder.getMode() == PlayerConstants.Mode.NORMAL) {
+            PlayerViewHolder.enterFloatingWindow = true;
+            playerViewHolder.setMode(PlayerConstants.Mode.PIP);
+            createFloatingWindow();
+        }
+        else {
+            PlayerViewHolder.enterFloatingWindow = false;
+            playerViewHolder.setMode(PlayerConstants.Mode.NORMAL);
+            openDetail();
+        }
     }
 
     /**
@@ -322,7 +346,12 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 windowManager = (WindowManager) getApplication().getSystemService(WINDOW_SERVICE);
 
                 layoutParams = new WindowManager.LayoutParams();
-                layoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT | WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                }
+                else {
+                    layoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+                }
 
                 layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 
