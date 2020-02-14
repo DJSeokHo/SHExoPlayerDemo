@@ -219,9 +219,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
         这里作为测试，你可以在这里控制播放器的播放内容
         不用我说，你也知道。。。这里只能3选1，要么是RTMP的直播流，要么是MP4的文件，要么是HLS的流文件
          */
-        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
+//        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
 //        playerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
-//        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
+        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
 
         playerViewHolder.initPlayer();
     }

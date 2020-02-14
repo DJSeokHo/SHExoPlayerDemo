@@ -8,9 +8,12 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -31,6 +34,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
@@ -537,12 +541,24 @@ public class PlayerViewHolder {
 
         exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
+        DefaultRenderersFactory rendererFactory = new DefaultRenderersFactory(view.getContext(), DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+
+        LoadControl loadControl = new DefaultLoadControl.Builder()
+                .setAllocator(new DefaultAllocator(true, 16))
+//                .setBufferDurationsMs(
+//                        1000,
+//                        15000,
+//                        500,
+//                        0)
+                .setBufferDurationsMs(2000, 5000, 1500, 2000)
+                .setTargetBufferBytes(-1)
+                .setPrioritizeTimeOverSizeThresholds(true).createDefaultLoadControl();
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(view.getContext(), trackSelector);
+        simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(view.getContext(), rendererFactory, trackSelector, loadControl);
 
         simpleExoPlayer.addListener(eventListener);
         simpleExoPlayer.addVideoListener(videoListener);

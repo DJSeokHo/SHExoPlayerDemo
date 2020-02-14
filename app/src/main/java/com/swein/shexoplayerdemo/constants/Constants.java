@@ -3,7 +3,8 @@ package com.swein.shexoplayerdemo.constants;
 public class Constants {
 
     // rtmp 测试地址，可能需要翻墙，不翻墙请自行寻找
-    public final static String RTMP_URL = "rtmp://fms.105.net/live/rmc1";
+//    public final static String RTMP_URL = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
+    public final static String RTMP_URL = "rtmp://haneultv.xst.kinxcdn.com/haneultv/pBnf4x";
 
     // vod mp4 测试地址，可能需要翻墙，不翻墙请自行寻找
     public final static String MP4_VOD_URL = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4";
