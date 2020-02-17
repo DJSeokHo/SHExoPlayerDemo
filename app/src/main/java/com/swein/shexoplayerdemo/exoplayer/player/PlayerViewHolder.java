@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -252,7 +253,7 @@ public class PlayerViewHolder {
 
         @Override
         public void onRenderedFirstFrame() {
-
+            ILog.iLogDebug(TAG, "onRenderedFirstFrame");
 //            ILog.iLogDebug(TAG, "onRenderedFirstFrame");
 //            ILog.iLogDebug(TAG, simpleExoPlayer.getDuration());
 //            ILog.iLogDebug(TAG, simpleExoPlayer.getCurrentPosition());
@@ -541,7 +542,21 @@ public class PlayerViewHolder {
 
         exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
-        DefaultRenderersFactory rendererFactory = new DefaultRenderersFactory(view.getContext(), DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+        DefaultRenderersFactory rendererFactory = new DefaultRenderersFactory(view.getContext());
+
+        ILog.iLogDebug(TAG, "renderers factory finish");
+
+        //Minimum Video you want to buffer while Playinguo
+        int minimum_buffer_duration = 2000;
+
+        //Max Video you want to buffer during PlayBack
+        int max_buffer_duration = 5000;
+
+        //Min Video you want to buffer before start Playing it
+        int minimum_playback_start_buffer = 1000;
+
+        //Min video You want to buffer when user resumes video
+        int minimum_playback_resume_buffer = 2000;
 
         LoadControl loadControl = new DefaultLoadControl.Builder()
                 .setAllocator(new DefaultAllocator(true, 16))
@@ -550,13 +565,22 @@ public class PlayerViewHolder {
 //                        15000,
 //                        500,
 //                        0)
-                .setBufferDurationsMs(2000, 5000, 1500, 2000)
-                .setTargetBufferBytes(-1)
-                .setPrioritizeTimeOverSizeThresholds(true).createDefaultLoadControl();
+                .setBufferDurationsMs(
+                        minimum_buffer_duration,        //Minimum Video you want to buffer while Playing
+                        max_buffer_duration,            //Max Video you want to buffer during PlayBack
+                        minimum_playback_start_buffer,  //Min Video you want to buffer before start Playing it
+                        minimum_playback_resume_buffer) //Min video You want to buffer when user resumes video
+                .setTargetBufferBytes(C.LENGTH_UNSET)
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .createDefaultLoadControl();
+
+        ILog.iLogDebug(TAG, "load control finish");
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        ILog.iLogDebug(TAG, "track selection finish");
 
         simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(view.getContext(), rendererFactory, trackSelector, loadControl);
 
@@ -568,7 +592,12 @@ public class PlayerViewHolder {
         exoPlayerView.setUseController(false);
 
         createMediaSource();
+
+        ILog.iLogDebug(TAG, "create media source finish");
+
         resumePlay();
+
+        ILog.iLogDebug(TAG, "resume play finish");
 
         playerControllerViewHolder.updateControllerUI(playerState);
         toggleController();
@@ -703,7 +732,6 @@ public class PlayerViewHolder {
     public void resumePlay() {
         simpleExoPlayer.setPlayWhenReady(true);
         playerState = PlayerConstants.PlayerState.PLAY;
-
     }
 
     /**
