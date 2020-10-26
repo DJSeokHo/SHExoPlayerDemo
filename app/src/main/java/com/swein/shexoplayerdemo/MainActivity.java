@@ -6,16 +6,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
-import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import com.swein.shexoplayerdemo.exoplayer.ExoPlayerActivity;
 import com.swein.shexoplayerdemo.framework.util.activity.ActivityUtil;
 import com.swein.shexoplayerdemo.framework.util.toast.ToastUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
 
     private final static int ACTION_MANAGE_OVERLAY_PERMISSION_CODE = 101;
 
@@ -26,21 +27,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.buttonPlayer).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityUtil.startNewActivityWithoutFinish(MainActivity.this, ExoPlayerActivity.class);
-            }
-        });
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkPermission();
-        }
+        findViewById(R.id.buttonPlayer).setOnClickListener(v -> openPlayer());
     }
 
-    /**
-     * 检查浮窗权限，用于PIP(画中画)
-     */
+    private void openPlayer() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (!Settings.canDrawOverlays(MainActivity.this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_CODE);
+            }
+            else {
+                ActivityUtil.startNewActivityWithoutFinish(MainActivity.this, ExoPlayerActivity.class);
+            }
+
+        }
+        else {
+            ActivityUtil.startNewActivityWithoutFinish(MainActivity.this, ExoPlayerActivity.class);
+        }
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkPermission() {
         if (!Settings.canDrawOverlays(MainActivity.this)) {
@@ -50,23 +59,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 检查浮窗权限的结果，不同意权限的话就直接退出，你也可以修改成自己的逻辑
-     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_CODE) {
-            if (!Settings.canDrawOverlays(this)) {
+            if (Settings.canDrawOverlays(this)) {
                 // SYSTEM_ALERT_WINDOW permission not granted
-                finish();
+                ActivityUtil.startNewActivityWithoutFinish(MainActivity.this, ExoPlayerActivity.class);
             }
+
         }
     }
 
-    /**
-     * 连续按两次回退键就退出app
-     */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 

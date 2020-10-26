@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,6 +16,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.swein.shexoplayerdemo.R;
 import com.swein.shexoplayerdemo.constants.Constants;
@@ -47,7 +48,7 @@ import com.swein.shexoplayerdemo.framework.util.thread.ThreadUtil;
  *
  * 分离各层，单独控制，是核心
  */
-public class ExoPlayerActivity extends AppCompatActivity {
+public class ExoPlayerActivity extends FragmentActivity {
 
     private final static String TAG = "ExoPlayerActivity";
 
@@ -219,9 +220,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
         这里作为测试，你可以在这里控制播放器的播放内容
         不用我说，你也知道。。。这里只能3选1，要么是RTMP的直播流，要么是MP4的文件，要么是HLS的流文件
          */
-//        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
+        playerViewHolder.setUrl(Constants.MP4_VOD_URL, PlayerConstants.URLType.MP4);
 //        playerViewHolder.setUrl(Constants.HLS_VOD_URL, PlayerConstants.URLType.HLS);
-        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
+//        playerViewHolder.setUrl(Constants.RTMP_URL, PlayerConstants.URLType.RTMP);
 
         playerViewHolder.initPlayer();
     }
