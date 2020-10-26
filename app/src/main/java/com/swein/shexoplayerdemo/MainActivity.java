@@ -47,17 +47,8 @@ public class MainActivity extends FragmentActivity {
         else {
             ActivityUtil.startNewActivityWithoutFinish(MainActivity.this, ExoPlayerActivity.class);
         }
-
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void checkPermission() {
-        if (!Settings.canDrawOverlays(MainActivity.this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_CODE);
-        }
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override

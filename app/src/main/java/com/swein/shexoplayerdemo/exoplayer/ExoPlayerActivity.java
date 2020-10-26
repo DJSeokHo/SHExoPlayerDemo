@@ -104,10 +104,6 @@ public class ExoPlayerActivity extends FragmentActivity {
              */
             private float lastX;
             private float lastY;
-            private float nowX;
-            private float nowY;
-            private float tranX;
-            private float tranY;
 
             @Override
             public void onActionDown(MotionEvent event) {
@@ -117,11 +113,11 @@ public class ExoPlayerActivity extends FragmentActivity {
 
             @Override
             public void onActionMove(MotionEvent event) {
-                nowX = event.getRawX();
-                nowY = event.getRawY();
+                float nowX = event.getRawX();
+                float nowY = event.getRawY();
 
-                tranX = nowX - lastX;
-                tranY = nowY - lastY;
+                float tranX = nowX - lastX;
+                float tranY = nowY - lastY;
 
                 layoutParams.x += tranX;
                 layoutParams.y += tranY;
